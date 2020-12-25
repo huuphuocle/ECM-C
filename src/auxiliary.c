@@ -8,7 +8,7 @@
 /* Trial division for N by a list of precomputed primes */
 
 void trial_division(mpz_t N, unsigned long *primes)
-{
+{	
 	unsigned long l = primes[0];
 	int e;
 	mpz_t tmp;
@@ -135,6 +135,6 @@ void precompute(unsigned long *T, unsigned long B1, unsigned long *D, unsigned l
 	D[0] = j;
 	D[j+1] = max_d;
 	
-	printf("Precompute : %lu primes B1 ; %lu primes B2 ; maxd= %lu. \n Elapsed time: %f (s) \n", T[0], D[0], D[D[0]+1], (double)(clock() - st) / CLOCKS_PER_SEC);
+	printf("Precompute : %lu primes B1 ; %lu primes B2 ; max_difference = %lu.\nElapsed time: %f (s) \n", T[0], D[0], D[D[0]+1], (double)(clock() - st) / CLOCKS_PER_SEC);
 	return;
 }

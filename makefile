@@ -4,7 +4,7 @@ CC = gcc
 # compiler flags:
 #  -g    adds debugging information to the executable file
 #  -Wall turns on most, but not all, compiler warnings
-CFLAGS  = -g -Wall
+CFLAGS  = -g -static -static-libgcc -Wall
 
 # library flags:
 #	-lgmp	gmp.h
@@ -12,10 +12,10 @@ CFLAGS  = -g -Wall
 LIB = -lgmp -lm
 
 # C files
-FILES = main.c ecm.c factor.c ladder.c
+FILES = src/main.c src/ecm.c src/montgomery.c src/weierstrass.c src/auxiliary.c src/user.c
 
 # headers
-HEADERS = ecm.h
+HEADERS = headers/ecm.h
 
 # the build target executable:
 TARGET = myecm
