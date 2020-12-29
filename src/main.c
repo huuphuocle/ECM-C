@@ -28,14 +28,18 @@ int main(int argc, char * argv[]){
 	fclose(fp);
 	
 	unsigned long B1, B2;
+	int stage, param;
 
 	if (argc >= 3){
 		B1 = atoi(argv[2]);
-		if (argc == 4)
-			B2 = atoi(argv[3]);
+		B2 = atoi(argv[3]);
+		stage = atoi(argv[4]);
+		param = atoi(argv[5]);
 	}else{
-		B1 = 100000;
-		B2 = 5000000;
+		B1 = 20000;
+		B2 = 2000000;
+		stage = 1; // use 1 stage by default
+		param = 1; // use normal parametrization by default
 	}
 	
 	unsigned long size_array = (int) (1.5*B2/log(B2));
@@ -46,7 +50,7 @@ int main(int argc, char * argv[]){
 	// precompute primes up to limit B1 and B2 
 	precompute(primes,B1,differences,B2);
 	
-	factor(d, N, B1, primes, differences);
+	factor(d, N, B1, primes, differences, stage, param);
 
 	mpz_clears(d, N, NULL);
 	free(primes);

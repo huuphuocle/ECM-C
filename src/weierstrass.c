@@ -23,37 +23,39 @@ void printwPoint(mpz_t X, mpz_t Y, mpz_t Z){
 //     mpz_clears(y2, x3, NULL);
 // }
 
-void on_wCurve(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t N){
+int on_wCurve(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t N){
+    int flag;
     mpz_t y2, x3;
     mpz_inits(y2, x3, NULL);
-    mpz_powm_ui(y2, y, 2, N);
     mpz_powm_ui(x3, x, 3, N);
+    mpz_mul(y2, x, a);
+    mpz_add(y2,y2,b);
+    mpz_add(x3,x3,y2);
+    mpz_powm_ui(y2, y, 2, N);
     mpz_sub(y2, y2, x3);
-    mpz_mul(x3, x, a);
-    mpz_sub(y2, y2, x3);
-    mpz_sub(y2, y2, b);
     mpz_mod(y2, y2, N);
-    if(mpz_cmp_ui(y2, 0) == 0){
-        //printf("true\n");
+    flag = mpz_cmp_ui(y2, 0);
+    if(flag == 0){
+        printf("True\n");
     }else{
-        printf("false\n");
+        printf("False\n");
     }
     mpz_clears(y2, x3, NULL);
+    return 1+flag;
 }
 
 /* add two points on a Weierstrass curve */
 
-void wADD(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t X2, mpz_t Y2, mpz_t N, mpz_t a){
+int wADD(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t X2, mpz_t Y2, mpz_t N, mpz_t a){
 
     if(mpz_cmp(X1, X2) == 0){
         if(mpz_cmp(Y1, Y2) != 0){
             mpz_set_ui(X, 0);
             mpz_set_ui(Y, 1);
-            
+            return 0;
         }else{
-            wDBL(d, X, Y, X1, Y1, N, a);
+            return wDBL(d, X, Y, X1, Y1, N, a);
         }
-        return;
     }
     mpz_t X0, Y0, s, tmp, tmp2, tmp3;
 
@@ -62,7 +64,7 @@ void wADD(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t X2, mpz_t Y2, mpz
     mpz_sub(tmp2, X2, X1);
     mpz_gcdext (d, tmp, tmp3, tmp2, N);
     if (mpz_cmp_ui(d, 1) != 0){
-        return;
+        return 1;
     }
     mpz_sub(s, Y2, Y1);    
     mpz_mul(s, s, tmp);
@@ -81,17 +83,17 @@ void wADD(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t X2, mpz_t Y2, mpz
     mpz_set(X, X0);
     mpz_set(Y, Y0);
     mpz_clears(X0, Y0, s, tmp, tmp2, tmp3, NULL);
-    return;
+    return 0;
 }
 
 /* double a point in Weierstrass curve */
 
-void wDBL(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
+int wDBL(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
     
     if(mpz_cmp_ui(Y1,0)==0){
         mpz_set_ui(X, 0);
         mpz_set_ui(Y, 1);
-        return;
+        return 1;
     }
     mpz_t X0, Y0, s, tmp, tmp2, tmp3;
     mpz_inits(X0, Y0, s, tmp, tmp2, tmp3, NULL);
@@ -99,7 +101,7 @@ void wDBL(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
     mpz_mul_2exp(tmp2, Y1, 1);
     mpz_gcdext (d, tmp, tmp3, tmp2, N); // tmp * 2Y1 + tmp3 * N = d
     if (mpz_cmp_ui(d, 1) != 0){
-        return;
+        return 1;
     }
 
     mpz_powm_ui(s, X1, 2, N);
@@ -121,10 +123,10 @@ void wDBL(mpz_t d, mpz_t X, mpz_t Y, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
     mpz_set(X, X0);
     mpz_set(Y, Y0);
     mpz_clears(X0, Y0, s, tmp, tmp2, tmp3, NULL);
-    return;
+    return 0;
 }
 
-void wLADDER(mpz_t d, mpz_t X, mpz_t Y, mpz_t m, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
+int wLADDER(mpz_t d, mpz_t X, mpz_t Y, mpz_t m, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
     mpz_t X0, Y0, mt;
     mpz_inits(mt, X0, Y0, NULL);
     mpz_set(X0, X1);
@@ -137,14 +139,14 @@ void wLADDER(mpz_t d, mpz_t X, mpz_t Y, mpz_t m, mpz_t X1, mpz_t Y1, mpz_t N, mp
     for(int t = bcnt - 2; t >= 0; t--){
         wDBL(d, X0, Y0, X0, Y0, N, a);
         if(mpz_cmp_ui(d, 1) != 0){
-            return;
+            return 1;
         }
         mpz_fdiv_q_2exp(mt, m, t);
         m_t = mpz_get_ui(mt) & 1;
         if(m_t == 1){
             wADD(d, X0, Y0, X0, Y0, X1, Y1, N, a);    
             if(mpz_cmp_ui(d, 1) != 0){
-                return;
+                return 1;
             }
         }
     }
@@ -152,10 +154,10 @@ void wLADDER(mpz_t d, mpz_t X, mpz_t Y, mpz_t m, mpz_t X1, mpz_t Y1, mpz_t N, mp
     mpz_set(X, X0);
     mpz_set(Y, Y0);
     mpz_clears(mt, X0, Y0, NULL);
-    return;
+    return 0;
 }
 
-void wLADDER_ui(mpz_t d, mpz_t X, mpz_t Y, unsigned int m, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
+int wLADDER_ui(mpz_t d, mpz_t X, mpz_t Y, unsigned int m, mpz_t X1, mpz_t Y1, mpz_t N, mpz_t a){
     mpz_t X0, Y0;
     mpz_inits(X0, Y0, NULL);
     mpz_set(X0, X1);
@@ -172,13 +174,13 @@ void wLADDER_ui(mpz_t d, mpz_t X, mpz_t Y, unsigned int m, mpz_t X1, mpz_t Y1, m
     for(int t = bcnt - 2; t >= 0; t--){
         wDBL(d, X0, Y0, X0, Y0, N, a);
         if(mpz_cmp_ui(d, 1) != 0){
-            return;
+            return 1;
         }
         m_t = (m >> t) & 1;
         if(m_t == 1){
             wADD(d, X0, Y0, X0, Y0, X1, Y1, N, a);    
             if(mpz_cmp_ui(d, 1) != 0){
-                return;
+                return 1;
             }
         }
     }
@@ -186,7 +188,7 @@ void wLADDER_ui(mpz_t d, mpz_t X, mpz_t Y, unsigned int m, mpz_t X1, mpz_t Y1, m
     mpz_set(X, X0);
     mpz_set(Y, Y0);
     mpz_clears(X0, Y0, NULL);
-    return;
+    return 0;
 }
 
 /* convert a Montgomery curve to a Weierstrass curve */

@@ -135,6 +135,6 @@ void precompute(unsigned long *T, unsigned long B1, unsigned long *D, unsigned l
 	D[0] = j;
 	D[j+1] = max_d;
 	
-	printf("Precompute : %lu primes B1 ; %lu primes B2 ; max_difference = %lu.\nElapsed time: %f (s) \n", T[0], D[0], D[D[0]+1], (double)(clock() - st) / CLOCKS_PER_SEC);
+	printf("B1 = %lu\tB2 = %lu \n%lu primes B1 ; %lu primes B2 ; max_difference = %lu.\nElapsed time: %f (s) \n", B1, B2, T[0], D[0], D[D[0]+1], (double)(clock() - st) / CLOCKS_PER_SEC);
 	return;
 }
